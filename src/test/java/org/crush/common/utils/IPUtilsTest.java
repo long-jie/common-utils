@@ -1,5 +1,6 @@
 package org.crush.common.utils;
 
+import org.capybara.common.utils.IPUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
