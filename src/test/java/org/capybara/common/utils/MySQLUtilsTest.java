@@ -11,11 +11,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MySQLUtilsTest {
 
     @Test
-    void split() {
+    void split1() {
         InputStream is = MySQLUtilsTest.class.getResourceAsStream("/test.sql");
         MySQLUtils utils = new MySQLUtils();
         List<String> sqlStatements = utils.split(is, StandardCharsets.UTF_8);
-        assertEquals(3, sqlStatements.size());
+        assertEquals(6, sqlStatements.size());
+    }
+
+    @Test
+    void split2() {
+        InputStream is = MySQLUtilsTest.class.getResourceAsStream("/test.sql");
+        MySQLUtils utils = new MySQLUtils();
+        List<String> sqlStatements = utils.split(is);
+        assertEquals(6, sqlStatements.size());
     }
 
 }

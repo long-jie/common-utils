@@ -21,10 +21,15 @@ import java.util.List;
  */
 public class MySQLUtils {
 
+    public List<String> split(InputStream is) {
+        return split(is, Charset.defaultCharset());
+    }
+
     /**
      * 读入一个SQL文件，将里面的所有SQ语句切分成一条条语句
      *
-     * @param is sql file
+     * @param is      sql file
+     * @param charset 字符集
      * @return 每个元素都是一条单独的SQL语句
      */
     public List<String> split(InputStream is, Charset charset) {
