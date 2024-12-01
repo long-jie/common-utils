@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.capybara.common.utils.exception.UtilsException;
 import org.capybara.common.utils.g4.mysql.LineBasedListener;
 import org.capybara.common.utils.g4.mysql.MySQLLexer;
 import org.capybara.common.utils.g4.mysql.MySQLParser;
@@ -26,9 +27,9 @@ public class MySQLUtils {
     }
 
     /**
-     * 读入一个SQL文件，将里面的所有SQ语句切分成一条条语句
+     * 读入一个SQL文件，将里面的所有SQL语句切分成一条条语句
      *
-     * @param is      sql file
+     * @param is      sql file input stream
      * @param charset 字符集
      * @return 每个元素都是一条单独的SQL语句
      */
@@ -37,7 +38,7 @@ public class MySQLUtils {
         try {
             charStream = CharStreams.fromStream(is, charset);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new UtilsException("An exception occurred when converting a byte stream into a character stream", e);
         }
         MySQLLexer lexer = new MySQLLexer(charStream);
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
