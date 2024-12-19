@@ -4,11 +4,15 @@ import org.capybara.common.utils.exception.ExceptionUtils;
 import org.capybara.common.utils.exception.UtilsException;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Class工具类
@@ -37,33 +41,32 @@ public class ClassUtils {
             if (packageUrl == null) {
                 throw new UtilsException(String.format("package: [%s] does not exist", packageName));
             }
-            Path path = Paths.get(packageUrl.toURI());
-            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                    if (recursive) {
-                        return FileVisitResult.CONTINUE;
-                    }
-                    if (!dir.toString().equals(path.toString())) { // 不是当前目录直接跳过
-                        return FileVisitResult.SKIP_SUBTREE;
-                    } else {
-                        return FileVisitResult.CONTINUE;
-                    }
-                }
-
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                    String relative = path.relativize(file).toString();
-                    String fileName = relative.replace(CommonConstants.CLASS_FILE_EXTENSION, CommonConstants.EMPTY_STRING).replace(File.separator, CommonConstants.DOT);
-                    classNames.add(packageName + CommonConstants.DOT + fileName);
-                    return FileVisitResult.CONTINUE;
-                }
-
-            });
+            Path parentPath = Paths.get(packageUrl.toURI());
+            Stream<Path> pathStream = getSubPathStream(parentPath, recursive);
+            pathStream.map(convertToClassName(parentPath, packageName)).forEach(classNames::add);
         } catch (Exception e) {
             ExceptionUtils.throwRuntimeException(String.format("scan package error: %s", e.getMessage()), e);
         }
         return classNames;
+    }
+
+    private static Function<Path, String> convertToClassName(Path parentPath, String packageName) {
+        return filePath -> {
+            Path relativized = parentPath.relativize(filePath);
+            String fieldName = relativized.toString().replace(CommonConstants.CLASS_FILE_EXTENSION, CommonConstants.EMPTY_STRING)
+                    .replace(File.separator, CommonConstants.DOT);
+            return packageName + CommonConstants.DOT + fieldName;
+        };
+    }
+
+    private static Stream<Path> getSubPathStream(Path path, boolean recursive) throws IOException {
+        Stream<Path> pathStream;
+        if (recursive) {
+            pathStream = Files.walk(path).filter(Files::isRegularFile);
+        } else {
+            pathStream = Files.list(path).filter(Files::isRegularFile);
+        }
+        return pathStream;
     }
 
 }
